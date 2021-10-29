@@ -8,8 +8,12 @@
    --nlesc-yellow: #FFB213;
 }
 
+.title text {
+   fill: black;
+}
+
 text {
-   font-family: 'Nunito';
+   font-family: 'Nunito', sans-serif;
    font-weight: 700;
 }
 
@@ -38,7 +42,7 @@ text {
    fill: white;
 }
 
-text {
+g text {
    fill: white;
 }
 
@@ -99,7 +103,7 @@ text {
   (rect class: "group" x: -25 y: -25 width: 150 height: 300 rx: 20 /)
   ,@cpu
   (g transform: "translate(0, 200)") ,@ram (/g)
-  (line x1: 50 y1: 120 x2: 50 y2: 180 class: "fat-arrow" /)
+  (line x1: 50 y1: 125 x2: 50 y2: 175 class: "fat-arrow" /)
   (/g))
 )
 
@@ -115,22 +119,43 @@ text {
           (range 3))
     (/g)))
 
+(define distributed
+  `((g)
+    (g transform: "translate(125, 0)") ,@router (/g)
+    (g transform: "translate(0, 300)") ,@compute-unit (/g)
+    (g transform: "translate(200, 300)") ,@compute-unit (/g)
+    (g transform: "translate(400, 300)") ,@compute-unit (/g)
+    (line class: "lan" x1: 50 y1: 275 x2: 200 y2: 125 /)
+    (line class: "lan" x1: 250 y1: 275 x2: 250 y2: 125 /)
+    (line class: "lan" x1: 450 y1: 275 x2: 300 y2: 125 /)
+    (/g)))
+
+
 (define (translate dx dy element)
   `((g transform: ,(format "translate({},{})" dx dy)) ,@element (/g)))
 
-`((svg viewBox: "-30 -30 560 385"
+(define shared
+  `((g)
+    (rect class: "group" x: -25 y: -25 width: 550 height: 375 rx: 20 /)
+    ,@(append-map (lambda (i) (translate (* 200 i) 0 cpu))
+                  (range 3))
+    (rect class: "case" x: 125 y: 200 width: 250 height: 40 rx: 10 /)
+    (text x: 250 y: 222 text-anchor: "middle" dominant-baseline: "middle"
+          font-size: 30) "BUS" (/text)
+    ,@(translate 125 270 ram)
+    ,@(translate 275 270 ram)
+    (line class: "fat-arrow" x1: 50 y1: 125 x2: 200 y2: 190 /)
+    (line class: "fat-arrow" x1: 250 y1: 125 x2: 250 y2: 190 /)
+    (line class: "fat-arrow" x1: 450 y1: 125 x2: 300 y2: 190 /)
+    (/g)))
+
+`((svg viewBox: "-30 -30 1150 670"
        xmlns: "http://www.w3.org/2000/svg"
        xmlns:xlink: "http://www.w3.org/1999/xlink")
   (style) ,style-sheet (/style)
-  (rect class: "group" x: -25 y: -25 width: 550 height: 375 rx: 20 /)
-  ,@(append-map (lambda (i) (translate (* 200 i) 0 cpu))
-                (range 3))
-  (rect class: "case" x: 125 y: 200 width: 250 height: 40 rx: 10 /)
-  (text x: 250 y: 222 text-anchor: "middle" dominant-baseline: "middle"
-        font-size: 30) "MEMORY BUS" (/text)
-  ,@(translate 125 270 ram)
-  ,@(translate 275 270 ram)
-  (line class: "fat-arrow" x1: 50 y1: 125 x2: 200 y2: 190 /)
-  (line class: "fat-arrow" x1: 250 y1: 125 x2: 250 y2: 190 /)
-  (line class: "fat-arrow" x1: 450 y1: 125 x2: 300 y2: 190 /)
+  (line x1: 545 y1: -30 x2: 545 y2: 670 stroke: "black" /)
+  (text class: "title" x: 250 y: 0 font-size: 30 text-anchor: "middle") "Shared Memory" (/text)
+  (text class: "title" x: 840 y: 0 font-size: 30 text-anchor: "middle") "Distributed Memory" (/text)
+  ,@(translate 590 60 distributed)
+  ,@(translate 0 160 shared)
   (/svg))

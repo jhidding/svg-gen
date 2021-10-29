@@ -1,4 +1,4 @@
-all: distributed-memory.svg shared-memory.svg
+all: memory-architecture.svg
 
 %.svg: %.scm
 	guile -L . graph-lang.scm < $^ > $@
