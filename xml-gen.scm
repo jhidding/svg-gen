@@ -1,14 +1,17 @@
+; ~\~ language=Scheme filename=xml-gen.scm
+; ~\~ begin <<README.md|main>>[0]
 (import (rnrs)
         (rnrs eval)
         (utility pmatch)
         (format format))
-        ;; (only (chezscheme) pretty-print))
-
+; ~\~ end
+; ~\~ begin <<README.md|main>>[1]
 (define (read-all)
   (do ((x (read) (read))
        (r '() (cons x r)))
       ((eof-object? x) (reverse r))))
-
+; ~\~ end
+; ~\~ begin <<README.md|main>>[2]
 (define (string-ends-with? c s)
   (eq? c (string-ref s (- (string-length s) 1))))
 
@@ -18,7 +21,8 @@
 (define (keyword->string obj)
   (let ((str (symbol->string obj)))
     (substring str 0 (- (string-length str) 1))))
-
+; ~\~ end
+; ~\~ begin <<README.md|main>>[3]
 (define (kwargs->attrs lst)
   (let loop ((lst lst)
              (r   '()))
@@ -31,14 +35,17 @@
        (loop rest
              (cons (format "{}" a) r)))
       (()  (reverse r)))))
-
+; ~\~ end
+; ~\~ begin <<README.md|main>>[4]
 (define (xmlize expr)
   (pmatch expr
     ((,tag)           (string-append "<" (symbol->string tag) ">"))
     ((,tag . ,kwargs) (string-append "<" (symbol->string tag) " " (string-join (kwargs->attrs kwargs) " ") ">"))
     (,a               a)))
-
+; ~\~ end
+; ~\~ begin <<README.md|main>>[5]
 (let* ((src  (read-all))
        (expr (eval (cons 'begin src)
                    (environment '(rnrs) '(utility algorithms) '(format format)))))
-  (display (string-join (map xmlize expr) "\n")))
+  (display (string-join (map xmlize expr) "\n")) (newline))
+; ~\~ end
