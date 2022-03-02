@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700');
+
+:root {
+   --nlesc-blue:   #009DDD;
+   --nlesc-purple: #380339;
+   --nlesc-yellow: #FFB213;
+
+   --some-gray:    #aaaaaa;
+}
+
+.paper {
+    fill: #ffffdd;
+}
+
+.box {
+    filter: drop-shadow(2px 2px 2px rgba(0,0,0, 0.3));
+    stroke: white;
+    stroke-width: 0.15;
+}
+
+.yellow {
+    fill: var(--nlesc-yellow);
+}
+
+.blue {
+    fill: var(--nlesc-blue);
+}
+
+/* .arrow {
+    stroke: black;
+    stroke-width: 2;
+}
+
+.arrow-head {
+    fill: black;
+} */
+
+.gray {
+    stroke: var(--some-gray);
+    fill: var(--some-gray);
+    stroke-width: 2;
+}
+
+.black {
+    stroke: black;
+    fill: black;
+    stroke-width: 2;
+}
+
+.arrow-head {
+    stroke: none;
+}

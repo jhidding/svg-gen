@@ -3,10 +3,10 @@ title: Programmable XML from Scheme
 author: Johan Hidding
 ---
 
-This Scheme script translates S-expressions to XML. This lets you use the full (R6RS) Scheme language to generate any XML document. You may run this using Guile or Chez Scheme.
+This Scheme script translates S-expressions to XML. This lets you use the full (R6RS) Scheme language to generate any XML document. This script is fully R6RS compatible, but it does use some libraries that are specific to Guile, namely `(ice-9 format)` and `(ice-9 match)`.
 
 ```bash
-guile -L . xml-gen.scm <<EOF | xmlindent -i 2
+guile xml-gen.scm <<EOF | xmlindent -i 2
 '((html)
   (h1) "Hello, World!" (/h1)
   (p) "This is translated into HTML." (/p)
@@ -32,13 +32,13 @@ The input can be any number of Scheme expressions; they will be evaluated as if 
 I use this to create programmable SVG documents. If you want to do anything similar for a serious project, consider using something less hacky. The upshot of this implementation is that it is extremely trivial in Scheme.
 
 ## Source
-I use the `pmatch` macro to match the S-expressions to well known XML patterns. Specifically, I match for
+I use the `match` macro to match the S-expressions to well known XML patterns. Specifically, I match for
 
 - `(tag attr1: "value" attr2: "value") ... (/tag)`
 - `(tag attr1: "value" /)`
 - `(/tag)`
 
-and translate those to their XML equivalents. To do string formatting I use a home brewn `format` utility, using string formatting symilar to that of Rust, Python, C#, i.e. using `{}` as wildcards.
+and translate those to their XML equivalents (incidentally, the more obscure `(?xml ... ?)` header also parses correctly).
 
 ``` {.scheme file=xml-gen.scm #main}
 (import (rnrs)
@@ -102,18 +102,19 @@ Anything that is not a list is kept as is.
     (a               a)))
 ```
 
+Any `(import ...)` statements at the start are extracted and used to create the environment in which the rest of the document is evaluated.
+
 ``` {.scheme #main}
 (define (run code)
   (match code
-    ((('import . <imports>) . <program>)
+    ((('import . <imports> ) . <program>)
      (eval (cons 'begin <program>)
-           (apply environment <imports>)))
+           (apply environment '(rnrs) <imports>)))
     (<program>
      (eval (cons 'begin <program>)
            (environment '(rnrs))))))
 
 (let* ((src  (read-all))
-       (expr (eval (cons 'begin src)
-                   (environment '(rnrs)))))
+       (expr (run src)))
   (display (string-join (map xmlize expr) "\n")) (newline))
 ```

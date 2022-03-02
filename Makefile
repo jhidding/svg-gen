@@ -1,4 +1,4 @@
-all: memory-architecture.svg
+all: $(patsubst %.scm,%.svg,$(wildcard examples/*.scm))
 
-%.svg: %.scm
-	guile -L . xml-gen.scm < $^ > $@
+examples/%.svg: examples/%.scm examples/style.css
+	guile xml-gen.scm < $< > $@

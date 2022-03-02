@@ -46,15 +46,14 @@
 ; ~\~ begin <<README.md|main>>[5]
 (define (run code)
   (match code
-    ((('import . <imports>) . <program>)
+    ((('import . <imports> ) . <program>)
      (eval (cons 'begin <program>)
-           (apply environment <imports>)))
+           (apply environment '(rnrs) <imports>)))
     (<program>
      (eval (cons 'begin <program>)
            (environment '(rnrs))))))
 
 (let* ((src  (read-all))
-       (expr (eval (cons 'begin src)
-                   (environment '(rnrs)))))
+       (expr (run src)))
   (display (string-join (map xmlize expr) "\n")) (newline))
 ; ~\~ end
