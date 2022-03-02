@@ -2,8 +2,8 @@
 ; ~\~ begin <<README.md|main>>[0]
 (import (rnrs)
         (rnrs eval)
-        (utility pmatch)
-        (format format))
+        (ice-9 match)
+        (ice-9 format))
 ; ~\~ end
 ; ~\~ begin <<README.md|main>>[1]
 (define (read-all)
@@ -26,26 +26,35 @@
 (define (kwargs->attrs lst)
   (let loop ((lst lst)
              (r   '()))
-    (pmatch lst
-      ((,kw ,arg . ,rest) (guard (keyword? kw))
+    (match lst
+      (((? keyword? kw) arg . rest)
        (loop rest
-             (cons (format "{}=\"{}\"" (keyword->string kw) arg) r)))
-      ((/) (reverse (cons "/" r)))
-      ((,a . ,rest)
+             (cons (format #f "~a=\"~a\"" (keyword->string kw) arg) r)))
+      (('/) (reverse (cons "/" r)))
+      ((a . rest)
        (loop rest
-             (cons (format "{}" a) r)))
+             (cons (format #f "~a" a) r)))
       (()  (reverse r)))))
 ; ~\~ end
 ; ~\~ begin <<README.md|main>>[4]
 (define (xmlize expr)
-  (pmatch expr
-    ((,tag)           (string-append "<" (symbol->string tag) ">"))
-    ((,tag . ,kwargs) (string-append "<" (symbol->string tag) " " (string-join (kwargs->attrs kwargs) " ") ">"))
-    (,a               a)))
+  (match expr
+    ((tag)           (string-append "<" (symbol->string tag) ">"))
+    ((tag . kwargs)  (string-append "<" (symbol->string tag) " " (string-join (kwargs->attrs kwargs) " ") ">"))
+    (a               a)))
 ; ~\~ end
 ; ~\~ begin <<README.md|main>>[5]
+(define (run code)
+  (match code
+    ((('import . <imports>) . <program>)
+     (eval (cons 'begin <program>)
+           (apply environment <imports>)))
+    (<program>
+     (eval (cons 'begin <program>)
+           (environment '(rnrs))))))
+
 (let* ((src  (read-all))
        (expr (eval (cons 'begin src)
-                   (environment '(rnrs) '(utility algorithms) '(format format)))))
+                   (environment '(rnrs)))))
   (display (string-join (map xmlize expr) "\n")) (newline))
 ; ~\~ end

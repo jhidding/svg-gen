@@ -43,8 +43,8 @@ and translate those to their XML equivalents. To do string formatting I use a ho
 ``` {.scheme file=xml-gen.scm #main}
 (import (rnrs)
         (rnrs eval)
-        (utility pmatch)
-        (format format))
+        (ice-9 match)
+        (ice-9 format))
 ```
 
 We read all input from standard input. The `read-all` function returns the corresponding S-expression.
@@ -81,14 +81,14 @@ The `kwargs->attrs` function translates a list of arguments to XML format. For e
 (define (kwargs->attrs lst)
   (let loop ((lst lst)
              (r   '()))
-    (pmatch lst
-      ((,kw ,arg . ,rest) (guard (keyword? kw))
+    (match lst
+      (((? keyword? kw) arg . rest)
        (loop rest
-             (cons (format "{}=\"{}\"" (keyword->string kw) arg) r)))
-      ((/) (reverse (cons "/" r)))
-      ((,a . ,rest)
+             (cons (format #f "~a=\"~a\"" (keyword->string kw) arg) r)))
+      (('/) (reverse (cons "/" r)))
+      ((a . rest)
        (loop rest
-             (cons (format "{}" a) r)))
+             (cons (format #f "~a" a) r)))
       (()  (reverse r)))))
 ```
 
@@ -96,15 +96,24 @@ Anything that is not a list is kept as is.
 
 ``` {.scheme #main}
 (define (xmlize expr)
-  (pmatch expr
-    ((,tag)           (string-append "<" (symbol->string tag) ">"))
-    ((,tag . ,kwargs) (string-append "<" (symbol->string tag) " " (string-join (kwargs->attrs kwargs) " ") ">"))
-    (,a               a)))
+  (match expr
+    ((tag)           (string-append "<" (symbol->string tag) ">"))
+    ((tag . kwargs)  (string-append "<" (symbol->string tag) " " (string-join (kwargs->attrs kwargs) " ") ">"))
+    (a               a)))
 ```
 
 ``` {.scheme #main}
+(define (run code)
+  (match code
+    ((('import . <imports>) . <program>)
+     (eval (cons 'begin <program>)
+           (apply environment <imports>)))
+    (<program>
+     (eval (cons 'begin <program>)
+           (environment '(rnrs))))))
+
 (let* ((src  (read-all))
        (expr (eval (cons 'begin src)
-                   (environment '(rnrs) '(utility algorithms) '(format format)))))
+                   (environment '(rnrs)))))
   (display (string-join (map xmlize expr) "\n")) (newline))
 ```
