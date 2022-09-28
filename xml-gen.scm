@@ -1,5 +1,5 @@
 ; ~\~ language=Scheme filename=xml-gen.scm
-; ~\~ begin <<README.md|main>>[0]
+; ~\~ begin <<README.md|main>>[init]
 (import (rnrs)
         (rnrs eval)
         (ice-9 match)
