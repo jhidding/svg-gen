@@ -3,6 +3,8 @@
 (import (rnrs (6))
         (srfi srfi-13))
 
+;; not shown here, boring
+; ~\~ begin <<README.md|strip-css-comments>>[init]
 (define (strip-css-comments text)
   (let loop ((result '())
              (text text))
@@ -13,6 +15,7 @@
              (chunk (if (and a b) (substring text 0 a) text))
              (remain (if (and a b) (substring text (+ b 2) (string-length text)) "")))
         (loop (cons chunk result) remain)))))
+; ~\~ end
 
 (define style-sheet
   (strip-css-comments

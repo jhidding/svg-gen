@@ -46,10 +46,7 @@ $(target): examples/pythagoras.scm examples/pythagoras.css
 >       guile xml-gen.scm < $< | convert -density 200 '-' $@
 ```
 
-``` {.scheme file=examples/pythagoras.scm #pythagoras}
-(import (rnrs (6))
-        (srfi srfi-13))
-
+``` {.scheme .hide #strip-css-comments}
 (define (strip-css-comments text)
   (let loop ((result '())
              (text text))
@@ -60,6 +57,14 @@ $(target): examples/pythagoras.scm examples/pythagoras.css
              (chunk (if (and a b) (substring text 0 a) text))
              (remain (if (and a b) (substring text (+ b 2) (string-length text)) "")))
         (loop (cons chunk result) remain)))))
+```
+
+``` {.scheme file=examples/pythagoras.scm #pythagoras}
+(import (rnrs (6))
+        (srfi srfi-13))
+
+;; not shown here, boring
+<<strip-css-comments>>
 
 (define style-sheet
   (strip-css-comments
@@ -90,6 +95,8 @@ $(target): examples/pythagoras.scm examples/pythagoras.css
     (/g)
   (/svg))
 ```
+
+We use pink as a base color, then darken every branch in the tree by 80%.
 
 ``` {.css file=examples/pythagoras.css}
 g.leaf circle {
