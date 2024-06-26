@@ -1,10 +1,9 @@
-; ~\~ language=Scheme filename=examples/pythagoras.scm
-; ~\~ begin <<README.md|pythagoras>>[init]
+; ~/~ begin <<README.md#examples/pythagoras.scm>>[init]
 (import (rnrs (6))
         (srfi srfi-13))
 
 ;; not shown here, boring
-; ~\~ begin <<README.md|strip-css-comments>>[init]
+; ~/~ begin <<README.md#strip-css-comments>>[init]
 (define (strip-css-comments text)
   (let loop ((result '())
              (text text))
@@ -15,7 +14,7 @@
              (chunk (if (and a b) (substring text 0 a) text))
              (remain (if (and a b) (substring text (+ b 2) (string-length text)) "")))
         (loop (cons chunk result) remain)))))
-; ~\~ end
+; ~/~ end
 
 (define style-sheet
   (strip-css-comments
@@ -29,9 +28,9 @@
              (content '()))
     (if (zero? d)
       content
-      (loop 
+      (loop
         (- d 1)
-        `((g class: "leaf" data-depth: d) ,@fig 
+        `((g class: "leaf" data-depth: d) ,@fig
               (g transform: ,t1) ,@content (/g)
               (g transform: ,t2) ,@content (/g)
           (/g))))))
@@ -45,4 +44,4 @@
     ,@(build-tree 10 transform-1 transform-2 '((circle cx: 0 cy: 0 r: 70 /)))
     (/g)
   (/svg))
-; ~\~ end
+; ~/~ end

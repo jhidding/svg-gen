@@ -59,7 +59,7 @@ $(target): examples/pythagoras.scm examples/pythagoras.css
         (loop (cons chunk result) remain)))))
 ```
 
-``` {.scheme file=examples/pythagoras.scm #pythagoras}
+``` {.scheme file=examples/pythagoras.scm}
 (import (rnrs (6))
         (srfi srfi-13))
 
@@ -78,9 +78,9 @@ $(target): examples/pythagoras.scm examples/pythagoras.css
              (content '()))
     (if (zero? d)
       content
-      (loop 
+      (loop
         (- d 1)
-        `((g class: "leaf" data-depth: d) ,@fig 
+        `((g class: "leaf" data-depth: d) ,@fig
               (g transform: ,t1) ,@content (/g)
               (g transform: ,t2) ,@content (/g)
           (/g))))))
@@ -117,11 +117,13 @@ I use the `match` macro to match the S-expressions to well known XML patterns. S
 
 and translate those to their XML equivalents (incidentally, the more obscure `(?xml ... ?)` header also parses correctly).
 
-``` {.scheme file=xml-gen.scm #main}
+``` {.scheme file=xml-gen.scm}
 (import (rnrs)
         (rnrs eval)
         (ice-9 match)
         (ice-9 format))
+
+<<main>>
 ```
 
 We read all input from standard input. The `read-all` function returns the corresponding S-expression.
@@ -199,4 +201,4 @@ Any `(import ...)` statements at the start are extracted and used to create the 
 # Resources
 
 - [Kent R Dubvig - The Scheme Programming Language](https://scheme.com/tspl4/)
-- 
+-

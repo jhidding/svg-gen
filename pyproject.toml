@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "svg-gen"
+version = "0.1.0"
+description = "Entangled dev env"
+authors = ["Johan Hidding <j.hidding@esciencecenter.nl>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+entangled-cli = "^2.0.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

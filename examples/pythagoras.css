@@ -1,5 +1,4 @@
-/* ~\~ language=CSS filename=examples/pythagoras.css */
-/* ~\~ begin <<README.md|examples/pythagoras.css>>[init] */
+/* ~/~ begin <<README.md#examples/pythagoras.css>>[init] */
 g.leaf circle {
    fill: #ffcccc;
 }
@@ -7,4 +6,4 @@ g.leaf circle {
 g.leaf {
    filter: brightness(80%);
 }
-/* ~\~ end */
+/* ~/~ end */

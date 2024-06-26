@@ -2,7 +2,6 @@
 <svg viewBox="0 0 500 390" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <style>
 
-
 g.leaf circle {
    fill: #ffcccc;
 }
@@ -10,7 +9,6 @@ g.leaf circle {
 g.leaf {
    filter: brightness(80%);
 }
-
 
 </style>
 <g transform="translate(320 310) scale(1 -1)">
