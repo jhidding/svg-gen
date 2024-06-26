@@ -9,10 +9,19 @@
   <style>
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
-    span.underline{text-decoration: underline;}
-    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
     pre > code.sourceCode { white-space: pre; position: relative; }
     pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
     pre > code.sourceCode > span:empty { height: 1.2em; }
@@ -51,7 +60,7 @@
     code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
     code span.at { color: #7d9029; } /* Attribute */
     code span.bn { color: #40a070; } /* BaseN */
-    code span.bu { } /* BuiltIn */
+    code span.bu { color: #008000; } /* BuiltIn */
     code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
     code span.ch { color: #4070a0; } /* Char */
     code span.cn { color: #880000; } /* Constant */
@@ -64,7 +73,7 @@
     code span.ex { } /* Extension */
     code span.fl { color: #40a070; } /* Float */
     code span.fu { color: #06287e; } /* Function */
-    code span.im { } /* Import */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
     code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
     code span.kw { color: #007020; font-weight: bold; } /* Keyword */
     code span.op { color: #666666; } /* Operator */
@@ -96,167 +105,225 @@
 </header>
 <div class="row">
         <div class="col-6 col-s-9" id="main">
-<p><a href="https://entangled.github.io/"><img src="https://img.shields.io/badge/entangled-Use%20the%20source!-%2300aeff" alt="Entangled badge" /></a></p>
-<p>Often when I need to create a diagram or illustration I find myself frustrated with the lack of programmability of Inkscape or the unfathomable syntax of Tikz. What do I need to do to program SVG directly? Thankfully, there is Scheme. If you don’t know what Scheme is, welcome to a <a href="https://ocw.mit.edu/courses/6-001-structure-and-interpretation-of-computer-programs-spring-2005/video_galleries/video-lectures/">world filled with magic and wonders</a>!</p>
+<p><a href="https://entangled.github.io/"><img
+src="https://img.shields.io/badge/entangled-Use%20the%20source!-%2300aeff"
+alt="Entangled badge" /></a></p>
+<p>Often when I need to create a diagram or illustration I find myself
+frustrated with the lack of programmability of Inkscape or the
+unfathomable syntax of Tikz. What do I need to do to program SVG
+directly? Thankfully, there is Scheme. If you don’t know what Scheme is,
+welcome to a <a
+href="https://ocw.mit.edu/courses/6-001-structure-and-interpretation-of-computer-programs-spring-2005/video_galleries/video-lectures/">world
+filled with magic and wonders</a>!</p>
 <section id="the-plan" class="level1">
 <h1>The plan</h1>
-<p>The following Scheme script translates S-expressions to XML. This lets you use the full (R6RS) Scheme language to generate any XML document. This script is fully R6RS compatible, but it does use some libraries that are specific to Guile, namely <code>(ice-9 format)</code> and <code>(ice-9 match)</code>.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">guile</span> xml-gen.scm <span class="op">&lt;&lt;EOF</span> <span class="kw">|</span> <span class="ex">xmlindent</span> <span class="at">-i</span> 2</span>
+<p>The following Scheme script translates S-expressions to XML. This
+lets you use the full (R6RS) Scheme language to generate any XML
+document. This script is fully R6RS compatible, but it does use some
+libraries that are specific to Guile, namely <code>(ice-9 format)</code>
+and <code>(ice-9 match)</code>.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">guile</span> xml-gen.scm <span class="op">&lt;&lt;EOF</span> <span class="kw">|</span> <span class="ex">xmlindent</span> <span class="at">-i</span> 2</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;((html)</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="st">  (h1) &quot;Hello, World!&quot; (/h1)</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="st">  (p) &quot;This is translated into HTML.&quot; (/p)</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="st">  (/html))</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span></code></pre></div>
 <p>Gives output:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode html"><code class="sourceCode html"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;html&gt;</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;h1&gt;</span></span>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">html</span><span class="dt">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    Hello, World!</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/h1&gt;</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;p&gt;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    This is translated into HTML.</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/p&gt;</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/html&gt;</span></span></code></pre></div>
-<p>The input can be any number of Scheme expressions; they will be evaluated as if contained in a <code>(begin ...)</code> block.</p>
-<p>I use this to create programmable SVG documents. If you want to do anything similar for a serious project, consider using something less hacky. The upshot of this implementation is that it is extremely trivial in Scheme. The full implementation can be found in the <a href="#source">Source</a> section.</p>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">html</span><span class="dt">&gt;</span></span></code></pre></div>
+<p>The input can be any number of Scheme expressions; they will be
+evaluated as if contained in a <code>(begin ...)</code> block.</p>
+<p>I use this to create programmable SVG documents. If you want to do
+anything similar for a serious project, consider using something less
+hacky. The upshot of this implementation is that it is extremely trivial
+in Scheme. The full implementation can be found in the <a
+href="#source">Source</a> section.</p>
 </section>
 <section id="example" class="level1">
 <h1>Example</h1>
-<p>Let us build a Pythagorean tree as an example. We build a binary tree out of SGV transformations.</p>
-<p><img src="fig/pythagoras.png" title="Pythagorean tree" class="figure" alt="Pythagorean tree" /></p>
+<p>Let us build a Pythagorean tree as an example. We build a binary tree
+out of SGV transformations.</p>
+<p><img src="fig/pythagoras.png" title="Pythagorean tree" class="figure"
+alt="Pythagorean tree" /></p>
+<div>
+<details><summary>strip-css-comments</summary>
+<div class="named-code-block">
+<p>«strip-css-comments»</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(strip-css-comments text)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> loop ((result &#39;())</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>             (text text))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">if</span> (<span class="kw">zero?</span> (<span class="kw">string-length</span> text))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>      (apply <span class="kw">string-append</span> (<span class="kw">reverse</span> result))</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">let*</span> ((a (string-contains text <span class="st">&quot;/*&quot;</span>))</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>             (b (<span class="kw">if</span> a (string-contains text <span class="st">&quot;*/&quot;</span> (<span class="op">+</span> a <span class="dv">2</span>)) <span class="dv">#f</span>))</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>             (chunk (<span class="kw">if</span> (<span class="kw">and</span> a b) (<span class="kw">substring</span> text <span class="dv">0</span> a) text))</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>             (remain (<span class="kw">if</span> (<span class="kw">and</span> a b) (<span class="kw">substring</span> text (<span class="op">+</span> b <span class="dv">2</span>) (<span class="kw">string-length</span> text)) <span class="st">&quot;&quot;</span>)))</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        (loop (<span class="kw">cons</span> chunk result) remain)))))</span></code></pre></div>
+</div>
+</details>
+</div>
 <div class="named-code-block">
 <p>file:examples/pythagoras.scm</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>(import (rnrs (<span class="dv">6</span>))</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>        (srfi srfi-13))</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">;; not shown here, boring</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>&lt;&lt;strip-css-comments&gt;&gt;</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> style-sheet</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  (strip-css-comments</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">call-with-input-file</span> <span class="st">&quot;examples/pythagoras.css&quot;</span> <span class="kw">get-string-all</span>)))</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> transform-1 </span><span class="st">&quot;scale(0.5) translate(100 200) rotate(-45)&quot;</span>)</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> transform-2 </span><span class="st">&quot;scale(0.7) translate(-100 200) rotate(60)&quot;</span>)</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(build-tree depth t1 t2 fig)</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> loop ((d depth)</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>             (content &#39;()))</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">if</span> (<span class="kw">zero?</span> d)</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>      content</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>      (loop </span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        (<span class="op">-</span> d <span class="dv">1</span>)</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        `((g class: <span class="st">&quot;leaf&quot;</span> data-depth: d) ,@fig </span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>              (g transform: ,t1) ,@content (/g)</span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>              (g transform: ,t2) ,@content (/g)</span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>          (/g))))))</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>`((?xml version: <span class="st">&quot;1.0&quot;</span> standalone: <span class="st">&quot;no&quot;</span> <span class="op">?</span>)</span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  (svg viewBox: <span class="st">&quot;0 0 500 390&quot;</span></span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>       xmlns: <span class="st">&quot;http://www.w3.org/2000/svg&quot;</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>       xmlns:xlink: <span class="st">&quot;http://www.w3.org/1999/xlink&quot;</span>)</span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    (style) ,style-sheet (/style)</span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    (g transform: <span class="st">&quot;translate(320 310) scale(1 -1)&quot;</span>)</span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    ,@(build-tree <span class="dv">10</span> transform-1 transform-2 &#39;((circle cx: <span class="dv">0</span> cy: <span class="dv">0</span> r: <span class="dv">70</span> <span class="op">/</span>)))</span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    (/g)</span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  (/svg))</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(import (rnrs (<span class="dv">6</span>))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>        (srfi srfi-13))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">;; not shown here, boring</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>&lt;&lt;strip-css-comments&gt;&gt;</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> style-sheet</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  (strip-css-comments</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">call-with-input-file</span> <span class="st">&quot;examples/pythagoras.css&quot;</span> <span class="kw">get-string-all</span>)))</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> transform-1 </span><span class="st">&quot;scale(0.5) translate(100 200) rotate(-45)&quot;</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> transform-2 </span><span class="st">&quot;scale(0.7) translate(-100 200) rotate(60)&quot;</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(build-tree depth t1 t2 fig)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> loop ((d depth)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>             (content &#39;()))</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">if</span> (<span class="kw">zero?</span> d)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>      content</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>      (loop</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        (<span class="op">-</span> d <span class="dv">1</span>)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        `((g class: <span class="st">&quot;leaf&quot;</span> data-depth: d) ,@fig</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>              (g transform: ,t1) ,@content (/g)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>              (g transform: ,t2) ,@content (/g)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>          (/g))))))</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>`((?xml version: <span class="st">&quot;1.0&quot;</span> standalone: <span class="st">&quot;no&quot;</span> <span class="op">?</span>)</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  (svg viewBox: <span class="st">&quot;0 0 500 390&quot;</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>       xmlns: <span class="st">&quot;http://www.w3.org/2000/svg&quot;</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>       xmlns:xlink: <span class="st">&quot;http://www.w3.org/1999/xlink&quot;</span>)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    (style) ,style-sheet (/style)</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    (g transform: <span class="st">&quot;translate(320 310) scale(1 -1)&quot;</span>)</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    ,@(build-tree <span class="dv">10</span> transform-1 transform-2 &#39;((circle cx: <span class="dv">0</span> cy: <span class="dv">0</span> r: <span class="dv">70</span> <span class="op">/</span>)))</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    (/g)</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>  (/svg))</span></code></pre></div>
 </div>
-<p>We use pink as a base color, then darken every branch in the tree by 80%.</p>
+<p>We use pink as a base color, then darken every branch in the tree by
+80%.</p>
 <div class="named-code-block">
 <p>file:examples/pythagoras.css</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode css"><code class="sourceCode css"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>g<span class="fu">.leaf</span> circle {</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>   <span class="kw">fill</span>: <span class="cn">#ffcccc</span><span class="op">;</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>g<span class="fu">.leaf</span> {</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>   <span class="kw">filter</span>: <span class="fu">brightness(</span><span class="dv">80</span><span class="dt">%</span><span class="fu">)</span><span class="op">;</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode css"><code class="sourceCode css"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>g<span class="fu">.leaf</span> circle {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>   <span class="kw">fill</span>: <span class="cn">#ffcccc</span><span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>g<span class="fu">.leaf</span> {</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>   <span class="kw">filter</span>: <span class="fu">brightness(</span><span class="dv">80</span><span class="dt">%</span><span class="fu">)</span><span class="op">;</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 </section>
 <section id="source" class="level1">
 <h1>Source</h1>
-<p>I use the <code>match</code> macro to match the S-expressions to well known XML patterns. Specifically, I match for</p>
+<p>I use the <code>match</code> macro to match the S-expressions to well
+known XML patterns. Specifically, I match for</p>
 <ul>
 <li><code>(tag attr1: "value" attr2: "value") ... (/tag)</code></li>
 <li><code>(tag attr1: "value" /)</code></li>
 <li><code>(/tag)</code></li>
 </ul>
-<p>and translate those to their XML equivalents (incidentally, the more obscure <code>(?xml ... ?)</code> header also parses correctly).</p>
+<p>and translate those to their XML equivalents (incidentally, the more
+obscure <code>(?xml ... ?)</code> header also parses correctly).</p>
 <div class="named-code-block">
 <p>file:xml-gen.scm</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(import (rnrs)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>        (rnrs <span class="kw">eval</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        (ice-9 match)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        (ice-9 format))</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(import (rnrs)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>        (rnrs <span class="kw">eval</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        (ice-9 match)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        (ice-9 format))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>&lt;&lt;main&gt;&gt;</span></code></pre></div>
 </div>
-<p>We read all input from standard input. The <code>read-all</code> function returns the corresponding S-expression.</p>
+<p>We read all input from standard input. The <code>read-all</code>
+function returns the corresponding S-expression.</p>
 <div class="named-code-block">
 <p>«main»</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(read-all)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">do</span> ((x (<span class="kw">read</span>) (<span class="kw">read</span>))</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>       (r &#39;() (<span class="kw">cons</span> x r)))</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>      ((<span class="kw">eof-object?</span> x) (<span class="kw">reverse</span> r))))</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(read-all)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">do</span> ((x (<span class="kw">read</span>) (<span class="kw">read</span>))</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>       (r &#39;() (<span class="kw">cons</span> x r)))</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>      ((<span class="kw">eof-object?</span> x) (<span class="kw">reverse</span> r))))</span></code></pre></div>
 </div>
 <p>Keywords are symbols that end with a colon.</p>
 <div class="named-code-block">
 <p>«main»</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(string-ends-with? c s)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">eq?</span> c (<span class="kw">string-ref</span> s (<span class="op">-</span> (<span class="kw">string-length</span> s) <span class="dv">1</span>))))</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(keyword? obj)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">and</span> (<span class="kw">symbol?</span> obj) (string-ends-with? <span class="ch">#\:</span> (<span class="kw">symbol-&gt;string</span> obj))))</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(keyword-&gt;string obj)</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((str (<span class="kw">symbol-&gt;string</span> obj)))</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">substring</span> str <span class="dv">0</span> (<span class="op">-</span> (<span class="kw">string-length</span> str) <span class="dv">1</span>))))</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(string-ends-with? c s)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">eq?</span> c (<span class="kw">string-ref</span> s (<span class="op">-</span> (<span class="kw">string-length</span> s) <span class="dv">1</span>))))</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(keyword? obj)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">and</span> (<span class="kw">symbol?</span> obj) (string-ends-with? <span class="ch">#\:</span> (<span class="kw">symbol-&gt;string</span> obj))))</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(keyword-&gt;string obj)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((str (<span class="kw">symbol-&gt;string</span> obj)))</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">substring</span> str <span class="dv">0</span> (<span class="op">-</span> (<span class="kw">string-length</span> str) <span class="dv">1</span>))))</span></code></pre></div>
 </div>
-<p>The <code>kwargs-&gt;attrs</code> function translates a list of arguments to XML format. For example:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(kwargs-&gt;attrs &#39;(a: <span class="dv">1</span> b: <span class="dv">2</span> c: <span class="st">&quot;hello&quot;</span>))</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="op">=&gt;</span> (<span class="st">&quot;a=</span><span class="ch">\&quot;</span><span class="st">1</span><span class="ch">\&quot;</span><span class="st"> b=</span><span class="ch">\&quot;</span><span class="st">2</span><span class="ch">\&quot;</span><span class="st"> c=</span><span class="ch">\&quot;</span><span class="st">hello</span><span class="ch">\&quot;</span><span class="st">)</span></span></code></pre></div>
+<p>The <code>kwargs-&gt;attrs</code> function translates a list of
+arguments to XML format. For example:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(kwargs-&gt;attrs &#39;(a: <span class="dv">1</span> b: <span class="dv">2</span> c: <span class="st">&quot;hello&quot;</span>))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="op">=&gt;</span> (<span class="st">&quot;a=</span><span class="ch">\&quot;</span><span class="st">1</span><span class="ch">\&quot;</span><span class="st"> b=</span><span class="ch">\&quot;</span><span class="st">2</span><span class="ch">\&quot;</span><span class="st"> c=</span><span class="ch">\&quot;</span><span class="st">hello</span><span class="ch">\&quot;</span><span class="st">)</span></span></code></pre></div>
 <div class="named-code-block">
 <p>«main»</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(kwargs-&gt;attrs lst)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> loop ((lst lst)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>             (r   &#39;()))</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    (match lst</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>      (((<span class="op">?</span> keyword? kw) arg <span class="op">.</span> rest)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>       (loop rest</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>             (<span class="kw">cons</span> (format <span class="dv">#f</span> <span class="st">&quot;~a=</span><span class="ch">\&quot;</span><span class="st">~a</span><span class="ch">\&quot;</span><span class="st">&quot;</span> (keyword-&gt;string kw) arg) r)))</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>      ((&#39;/) (<span class="kw">reverse</span> (<span class="kw">cons</span> <span class="st">&quot;/&quot;</span> r)))</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>      ((a <span class="op">.</span> rest)</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>       (loop rest</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>             (<span class="kw">cons</span> (format <span class="dv">#f</span> <span class="st">&quot;~a&quot;</span> a) r)))</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>      (()  (<span class="kw">reverse</span> r)))))</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(kwargs-&gt;attrs lst)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> loop ((lst lst)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>             (r   &#39;()))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    (match lst</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>      (((<span class="op">?</span> keyword? kw) arg <span class="op">.</span> rest)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>       (loop rest</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>             (<span class="kw">cons</span> (format <span class="dv">#f</span> <span class="st">&quot;~a=</span><span class="ch">\&quot;</span><span class="st">~a</span><span class="ch">\&quot;</span><span class="st">&quot;</span> (keyword-&gt;string kw) arg) r)))</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>      ((&#39;/) (<span class="kw">reverse</span> (<span class="kw">cons</span> <span class="st">&quot;/&quot;</span> r)))</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>      ((a <span class="op">.</span> rest)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>       (loop rest</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>             (<span class="kw">cons</span> (format <span class="dv">#f</span> <span class="st">&quot;~a&quot;</span> a) r)))</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>      (()  (<span class="kw">reverse</span> r)))))</span></code></pre></div>
 </div>
 <p>Anything that is not a list is kept as is.</p>
 <div class="named-code-block">
 <p>«main»</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(xmlize expr)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  (match expr</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    ((tag)           (<span class="kw">string-append</span> <span class="st">&quot;&lt;&quot;</span> (<span class="kw">symbol-&gt;string</span> tag) <span class="st">&quot;&gt;&quot;</span>))</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    ((tag <span class="op">.</span> kwargs)  (<span class="kw">string-append</span> <span class="st">&quot;&lt;&quot;</span> (<span class="kw">symbol-&gt;string</span> tag) <span class="st">&quot; &quot;</span> (string-join (kwargs-&gt;attrs kwargs) <span class="st">&quot; &quot;</span>) <span class="st">&quot;&gt;&quot;</span>))</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    (a               a)))</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(xmlize expr)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  (match expr</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    ((tag)           (<span class="kw">string-append</span> <span class="st">&quot;&lt;&quot;</span> (<span class="kw">symbol-&gt;string</span> tag) <span class="st">&quot;&gt;&quot;</span>))</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    ((tag <span class="op">.</span> kwargs)  (<span class="kw">string-append</span> <span class="st">&quot;&lt;&quot;</span> (<span class="kw">symbol-&gt;string</span> tag) <span class="st">&quot; &quot;</span> (string-join (kwargs-&gt;attrs kwargs) <span class="st">&quot; &quot;</span>) <span class="st">&quot;&gt;&quot;</span>))</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    (a               a)))</span></code></pre></div>
 </div>
-<p>Any <code>(import ...)</code> statements at the start are extracted and used to create the <a href="environment">environment</a> in which the rest of the document is evaluated.</p>
+<p>Any <code>(import ...)</code> statements at the start are extracted
+and used to create the <a href="environment">environment</a> in which
+the rest of the document is evaluated.</p>
 <div class="named-code-block">
 <p>«main»</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(run code)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  (match code</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    (((&#39;import <span class="op">.</span> &lt;imports&gt; ) <span class="op">.</span> &lt;program&gt;)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">eval</span> (<span class="kw">cons</span> &#39;begin &lt;program&gt;)</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>           (apply environment &#39;(rnrs) &lt;imports&gt;)))</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    (&lt;program&gt;</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">eval</span> (<span class="kw">cons</span> &#39;begin &lt;program&gt;)</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>           (environment &#39;(rnrs))))))</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>(<span class="kw">let*</span> ((src  (read-all))</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>       (expr (run src)))</span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">display</span> (string-join (map xmlize expr) <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)) (<span class="kw">newline</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode scheme"><code class="sourceCode scheme"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> </span>(run code)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  (match code</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    (((&#39;import <span class="op">.</span> &lt;imports&gt; ) <span class="op">.</span> &lt;program&gt;)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">eval</span> (<span class="kw">cons</span> &#39;begin &lt;program&gt;)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>           (apply environment &#39;(rnrs) &lt;imports&gt;)))</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    (&lt;program&gt;</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">eval</span> (<span class="kw">cons</span> &#39;begin &lt;program&gt;)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>           (environment &#39;(rnrs))))))</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>(<span class="kw">let*</span> ((src  (read-all))</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>       (expr (run src)))</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">display</span> (string-join (map xmlize expr) <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)) (<span class="kw">newline</span>))</span></code></pre></div>
 </div>
 </section>
 <section id="resources" class="level1">
 <h1>Resources</h1>
 <ul>
-<li><a href="https://scheme.com/tspl4/">Kent R Dubvig - The Scheme Programming Language</a></li>
+<li><a href="https://scheme.com/tspl4/">Kent R Dubvig - The Scheme
+Programming Language</a></li>
 <li></li>
 </ul>
 </section>
@@ -264,10 +331,14 @@
          <div class="col-3 col-s-3 menu" id="menu-container">
                 <div id="menu"><nav id="TOC" role="doc-toc">
                                 <ul>
-                                <li><a href="#the-plan">The plan</a></li>
-                                <li><a href="#example">Example</a></li>
-                                <li><a href="#source">Source</a></li>
-                                <li><a href="#resources">Resources</a></li>
+                                <li><a href="#the-plan"
+                                id="toc-the-plan">The plan</a></li>
+                                <li><a href="#example"
+                                id="toc-example">Example</a></li>
+                                <li><a href="#source"
+                                id="toc-source">Source</a></li>
+                                <li><a href="#resources"
+                                id="toc-resources">Resources</a></li>
                                 </ul>
                 </nav></div>
         </div> 

@@ -43,7 +43,7 @@ Let us build a Pythagorean tree as an example. We build a binary tree out of SGV
 Pythagorean tree
 ---
 $(target): examples/pythagoras.scm examples/pythagoras.css
->       guile xml-gen.scm < $< | convert -density 200 '-' $@
+>       guile xml-gen.scm < $< | rsvg-convert -x 2.0 -y 2.0 -o $@ -
 ```
 
 ``` {.scheme .hide #strip-css-comments}
